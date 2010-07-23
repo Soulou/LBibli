@@ -1,0 +1,7 @@
+Test program to use inotify with sqlite databases.
+
+Makefile will come, a simple gcc must supply to build the program.
+
+' gcc main.c callback.c inotify.c -o LBiblio '
+
+Just enjoy
