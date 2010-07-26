@@ -20,7 +20,7 @@ int listenTo(char * path)
 		return EXIT_FAILURE;
 	}
 
-	int watch = inotify_add_watch(fd_inotify, path , IN_ALL_EVENTS);
+	int watch = inotify_add_watch(fd_inotify, path , IN_CREATE|IN_DELETE);
 	if(watch < 0)
 	{
 		perror("Error : inotify_add_watch");
@@ -38,7 +38,7 @@ int listenTo(char * path)
 		if(select(fd_inotify+1, &fds, NULL, NULL, 0) <= 0) continue;
     
 		size_t carlu;
-		char buffer[1024];
+		char buffer[2048];
 		struct inotify_event * event_inotify;
     
 		carlu = read(fd_inotify, buffer, sizeof(buffer));
@@ -75,17 +75,17 @@ int addWatches(int fd_inotify, char * path)
     struct dirent * item;
     while((item = readdir(folder)) != NULL)
     {
-        if(item->d_type == DT_DIR)
+        if(item->d_type == DT_DIR && item->d_name[0] != '.')
         {
             fullpath = calloc(
-                strlen(path) + strlen("/") + strlen(item->d_name),
+                strlen(path) + strlen("/") + strlen(item->d_name) + 1,
                 sizeof(char));
             strcat(fullpath, path);
             strcat(fullpath, "/");
             strcat(fullpath,item->d_name);
             printf("fullpath : %s\n",fullpath);
 	        int watch = inotify_add_watch(fd_inotify,
-                    fullpath, IN_ALL_EVENTS);
+                    fullpath, IN_DELETE|IN_CREATE);
         	if(watch < 0)
 	        {
         		perror("Error : inotify_add_watch");
